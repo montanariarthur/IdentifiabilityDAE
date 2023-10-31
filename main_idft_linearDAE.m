@@ -1,8 +1,8 @@
 %% Identifiability analysis of a linear DAE model.
 % Evaluates the algebraic rank condition for identifiability over a given
 % system trajectory (for a particular choice of initial conditions). 
-% The DAE model of the system dynamics is described by f1 (differential
-% eqs) and f2 (algebraic eqs). The measurement function is defined by h.
+% The DAE model of the system dynamics is described by matrices A, E, and
+% C, which define the system function f and output function h. 
 % The parameters sought to be identified are listed in theta.
 
 % Copyright (C) 2023  Arthur Montanari
