@@ -30,4 +30,4 @@ The above codes are dependent on the following functions:
 
 
 # References
-1. A. N. Montanari, F. Lamoline, J. Goncalves. Identifiability of differential-algebraic equations. *Under review* (**2023**).
+1. A. N. Montanari, F. Lamoline, R. Bereza, J. Goncalves. Identifiability of differential-algebraic equations. *Under review* (**2023**).
