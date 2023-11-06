@@ -138,7 +138,7 @@ end
 
 % Evaluates observability rank
 count = 0;
-tol = 1e-8;
+tol = 1e-6;
 for k = 1:step:T
     if mod(k,10) == 0; disp(['Counting ',num2str(k),'/',num2str(N)]); end
     count = count + 1;
