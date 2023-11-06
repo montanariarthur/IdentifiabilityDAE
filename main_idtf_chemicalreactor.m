@@ -74,17 +74,6 @@ for i = 1:p
     Oc = subs(Oc,xbar(n1+i:n:end,1),zeros(n,1));
 end
 
-% Rank condition
-M1 = Oc(:,[n1+1:n1+p]);
-M2 = Oc(:,[1:n1 n1+p+1:size(Oc,2)]);
-rankOc = rank(Oc);
-rankM2 = rank(M2);
-if rankOc == p + rank(M2) 
-    disp(['Augmented DAE system is identifiable.'])
-else
-    disp(['Augmented DAE system is *not* identifiable.'])
-end
-
 %% Chemical reactor simulation
 addpath('./DAE models/')
 
