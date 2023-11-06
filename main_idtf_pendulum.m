@@ -1,4 +1,4 @@
-%% Identifiability analysis of a pendulum equation (DAE index 3).
+%% Identifiability analysis of a linear DAE model.
 % Evaluates the algebraic rank condition for identifiability over a given
 % system trajectory (for a particular choice of initial conditions). 
 % The DAE model of the system dynamics is described by f1 (differential
@@ -21,49 +21,49 @@
 % file license.txt.
 
 
-%% Pendulum equation -- index 3 DAE
+%% Identifiability of linear DAE system - order 4
+% Which structures are identifiable?
 clear all; close all; clc;
 
 % System dimension
-n1 = 4;             % differential variables
-n2 = 1;             % algebraic variables
+n1 = 2;             % differential variables
+n2 = 2;             % algebraic variables
 n = n1 + n2;        % full state vector
 
 % State variables
-syms t x1(t) x2(t) x3(t) x4(t) x5(t)
-X1 = [x1(t); x2(t); x3(t); x4(t)];      % x1 = [x y u v]
-X2 = [x5(t)];                           % x2 = [lambda]
-X = [X1; X2];      
+syms x1(t) x2(t) x3(t) x4(t)
+X1 = [x1(t);x2(t)];
+X2 = [x3(t);x4(t)];
+X = [X1; X2];
 
 % Parameters sought to be identified
-syms m L g kdrag real
-theta = [m g L]'
+A = sym('A',[n n])
+A11 = A(1:n1,1:n1);       A12 = A(1:n1,n1+1:n1+n2);
+A21 = A(n1+1:n1+n2,1:n1); A22 = A(n1+1:n1+n2,n1+1:n1+n2);
+
+theta = A(:);
 p = length(theta);
-kdrag = 0;
 
 % System equations
-f1 = [- diff(X(1),t) + X(3);
-      - diff(X(2),t) + X(4);
-      - m*diff(X(3),t) + X(5)*X(1)       - kdrag*sqrt(X(3)^2)*X(3);
-      - m*diff(X(4),t) + X(5)*X(2) - m*g - kdrag*sqrt(X(4)^2)*X(4)];
-f2 =  X(1)^2 + X(2)^2 - L^2;
+E = blkdiag(eye(n1),zeros(n2));
+f = - E*diff(X,t) + A*X;
 
 % Measurement function
-h  = [atan(-X(1)/X(2))];
+C = diag([1 1 1 1]);
+h = C*X
 
 % Extended system
 for i = 1:p        % parameters are converted to time dependent theta(t)
     theta_t(i,1) = str2sym([sym2str(theta(i)) '(t)']);
 end
 X = [X1; theta_t; X2]         % augmented state vector
-f1 = subs(f1,theta,theta_t);
-f2 = subs(f2,theta,theta_t);
-f = [f1; -diff(X(n1+1:n1+p,1)); f2]   % augmented system
+f = subs(f,theta,theta_t);
+f = [f(1:n1,1); -diff(X(n1+1:n1+p,1)); f(n1+1:n1+n2,1)]   % augmented
 h = subs(h,theta,theta_t)     % augmented measurement function
 n = n + p;                    % augmented dimension
 
 % Observability matrix
-[Oc,F,H] = DAEobsvmatrix(X,f,h,n,n-1);
+[Oc,F,H] = DAEobsvmatrix(X,f,h,n,6-1);
 
 % Forces thetadot = thetaddot = ... = 0 in the observability matrix
 xbar = [];                   % vector of symbolic state derivatives
@@ -74,41 +74,39 @@ for i = 1:p
     Oc = subs(Oc,xbar(n1+i+n:n:end,1),zeros(size(F,2),1));
 end
 
-%% Pendulum simulation
+%% Linear DAE simulation
 addpath('./DAE models/')
-n1 = 4;
-n2 = 1;
+n1 = 2;
+n2 = 2;
 n = n1 + n2 + p;
 
 % Parameters
-m_val = 0.3;
-g_val = 9.81;
-L_val = 6.25;
-k_val = 0;
-theta_val = [m_val g_val L_val k_val];
+sys = rss(n1+n2);
+A_val = sys.A;
+A11_val = A_val(1:n1,1:n1);       A12_val = A_val(1:n1,n1+1:n1+n2);
+A21_val = A_val(n1+1:n1+n2,1:n1); A22_val = A_val(n1+1:n1+n2,n1+1:n1+n2);
 
 % DAE settings
-x0 = [6.25 0 0 0 0 m_val g_val L_val]';
-tspan = [0:0.01:15];
-M = diag([1 1 m_val m_val 0 ones(1,p)]);
-options = odeset('Mass',M,'RelTol',1e-30,'AbsTol',1e-12*ones(1,length(x0)));
-[t,x] = ode15s(@(t,x)pendulum(t,x,theta_val,p),tspan,x0,options);
+x01 = randn(n1,1);
+x02 = -inv(A22_val)*A21_val*x01;
+theta_val = A_val(:); theta_val = theta_val(theta_val~=0);
+x0 = [x01; x02; theta_val];
 
-angle = atan(-x(:,1)./x(:,2));
-constraint1 = sqrt(x(:,1).^2+x(:,2).^2);
-constraint2 = x(:,1).*x(:,3) + x(:,2).*x(:,4);
-constraint3 = x(:,5).*(x(:,1).^2 + x(:,2).^2)/m_val + (x(:,3).^2 + x(:,4).^2) - g_val*x(:,2);
+tspan = [0:0.01:10];
+M = blkdiag(E,eye(p));
+options = odeset('Mass',M,'RelTol',1e-10,'AbsTol',1e-10*ones(1,length(x0)));
+[t,x] = ode15s(@(t,x)linearDAE(t,x,A_val,p),tspan,x0,options);
 
 figure(1);
-subplot(221); plot(t,x(:,[1 2]),t,constraint1); legend('x','y');
-subplot(222); plot(t,x(:,[3 4]),t,constraint2); legend('u','v');
-subplot(223); plot(t,x(:,5),t,constraint3);     legend('\lambda');
-subplot(224); plot(t,angle);                    legend('y = \phi');
+subplot(121); plot(t,x(:,[1 2])); ylabel('x1');
+subplot(122); plot(t,x(:,[3 4])); ylabel('x2');
+
 
 %% Evaluate observability rank (using data)
 N = length(x);      % number of data points
-step = 1;           % time step between data points
-T = N;              % simulation stop
+step = 10;          % time step between data points
+tol = 1e-6;
+T = N;           % simulation stop
 
 % Rearrange rows in state vector to [X1 theta X2]
 x = x(:,[1:n1 n-p+1:n n1+1:n1+n2]);
@@ -136,11 +134,11 @@ count = 0;
 tol = 1e-8;
 
 for k = 1:step:T
-    if mod(k,10) == 0; disp(['Counting ',num2str(k),'/',num2str(N)]); end
+    if mod(k,1) == 0; disp(['Counting ',num2str(k),'/',num2str(N)]); end
     count = count + 1;
     
     % Evaluates the observability rank at each time step
-    Oc_k = double(subs(Oc,[xbar;m;g;L;kdrag],[xder(k,:)';theta_val']));
+    Oc_k = double(subs(Oc,[xbar],[xder(k,:)']));
     
     % Identifiability
     M1_k = Oc_k(:,[n1+1:n1+p]);
@@ -152,16 +150,30 @@ end
 figure(4)
 colormap(flip(turbo))
 
-subplot(121)
-patch([t(1:step:T,1);NaN], [x(1:step:T,1);NaN], [double(ident(:)); double(ident(end))],...
+subplot(221)
+patch([t(1:step:T,1);NaN], [x(1:step:T,1);NaN], [double(ident(1:step:end)); double(ident(end))],...
     'EdgeColor','flat','LineWidth',2,'Marker','o','MarkerFaceColor','flat')
 colorbar; %set(gca,'ColorScale','log');
 caxis([-0.3 1.3]);
 xlabel('t'); ylabel('x_2');
 
-subplot(122)
-patch([x(1:step:T,1);NaN], [x(1:step:T,2);NaN], [double(ident(:)); double(ident(end))],...
+subplot(222)
+patch([t(1:step:T,1);NaN], [x(1:step:T,2);NaN], [double(ident(1:step:end)); double(ident(end))],...
     'EdgeColor','flat','LineWidth',2,'Marker','o','MarkerFaceColor','flat')
 colorbar; %set(gca,'ColorScale','log');
 caxis([-0.3 1.3]);
-xlabel('x_1'); ylabel('x_2');
+xlabel('t'); ylabel('x_2');
+
+subplot(223)
+patch([t(1:step:T,1);NaN], [x(1:step:T,3);NaN], [double(ident(1:step:end)); double(ident(end))],...
+    'EdgeColor','flat','LineWidth',2,'Marker','o','MarkerFaceColor','flat')
+colorbar; %set(gca,'ColorScale','log');
+caxis([-0.3 1.3]);
+xlabel('t'); ylabel('x_3');
+
+subplot(224)
+patch([t(1:step:T,1);NaN], [x(1:step:T,4);NaN], [double(ident(1:step:end)); double(ident(end))],...
+    'EdgeColor','flat','LineWidth',2,'Marker','o','MarkerFaceColor','flat')
+colorbar; %set(gca,'ColorScale','log');
+caxis([-0.3 1.3]);
+xlabel('t'); ylabel('x_4');
