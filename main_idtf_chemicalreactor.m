@@ -49,7 +49,7 @@ f1 = [- diff(X(1),t) + k1*(c0 - X(1)) - X(3);
 f2 =  X(3) - k5*exp(-k4/X(2))*X(1);
 
 % Measurement function
-h  = [X(3)];
+h  = [X(1)];
 
 % Extended system
 for i = 1:p        % parameters are converted to time dependent theta(t)
@@ -106,9 +106,9 @@ options = odeset('Mass',M,'RelTol',1e-20,'AbsTol',1e-15*ones(1,length(x0)));
 constraint1 =  param.k5*exp( -param.k4./x(:,2) ).*x(:,1);
 
 figure(1);
-subplot(131); plot(t,x(:,1),'Marker','o'); legend('c')
-subplot(132); plot(t,x(:,2),'Marker','o'); legend('T');
-subplot(133); plot(t,x(:,3),t,constraint1); legend('R');
+subplot(131); plot(t,x(:,1)); ylabel('x1'); xlabel('t')
+subplot(132); plot(t,x(:,2)); ylabel('x2'); xlabel('t')
+subplot(133); plot(t,constraint1); ylabel('x3'); xlabel('t')
 
 % Evaluate observability rank (using data)
 N = length(x);     % number of data points
@@ -138,7 +138,7 @@ end
 
 % Evaluates observability rank
 count = 0;
-tol_range = 1e-8;
+tol = 1e-8;
 for k = 1:step:T
     if mod(k,10) == 0; disp(['Counting ',num2str(k),'/',num2str(N)]); end
     count = count + 1;
@@ -156,14 +156,14 @@ end
 figure(3)
 colormap(flip(turbo))
 
-subplot(221)
+subplot(211)
 patch([t(1:step:T,1);NaN], [x(1:step:T,1);NaN], [double(ident(:)); double(ident(end))],...
     'EdgeColor','flat','LineWidth',5,'Marker','.','MarkerSize',5,'MarkerFaceColor','flat') %
 colorbar; caxis([-0.3 1.3]);
 xlabel('t'); ylabel('x_1');
 box on
 
-subplot(223)
+subplot(212)
 patch([t(1:step:T,1);NaN], [x(1:step:T,2);NaN], [double(ident(:)); double(ident(end))],...
     'EdgeColor','flat','LineWidth',5,'Marker','.','MarkerSize',5,'MarkerFaceColor','flat') %
 colorbar; caxis([-0.3 1.3]);
