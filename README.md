@@ -14,7 +14,7 @@ The full text of the GNU General Public License can be found in the file "LICENS
 
 The following codes are direct implementations of the parameter identifiability analysis conducted for the DAE systems studied in Ref. [1].
 
-- `main_idft_chemicalreactor` : Analysis of the identifiability of parameter `Tc` of a chemical reactor model for different types of measurement signals (sensors).
+- `main_idft_chemicalreactor` : Analysis of the identifiability of parameter `Tc` of a chemical reactor model for different types of measurement signals (sensors). See the Supplementary Material file `suppmaterial_git.pdf` for a discussion of this example.
 
 - `main_idft_pendulum` : Analysis of the identifiability of different combinations of parameters of a pendulum equation.
 
