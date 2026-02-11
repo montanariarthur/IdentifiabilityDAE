@@ -36,7 +36,7 @@ X2 = [x5(t)];                           % x2 = [lambda]
 X = [X1; X2];      
 
 % Parameters sought to be identified
-syms m L g kdrag real
+syms m L g kdrag u real
 theta = [m g L]'
 p = length(theta);
 kdrag = 0;
@@ -44,7 +44,7 @@ kdrag = 0;
 % System equations
 f1 = [- diff(X(1),t) + X(3);
       - diff(X(2),t) + X(4);
-      - m*diff(X(3),t) + X(5)*X(1)       - kdrag*sqrt(X(3)^2)*X(3);
+      - m*diff(X(3),t) + X(5)*X(1)       - kdrag*sqrt(X(3)^2)*X(3) + u;
       - m*diff(X(4),t) + X(5)*X(2) - m*g - kdrag*sqrt(X(4)^2)*X(4)];
 f2 =  X(1)^2 + X(2)^2 - L^2;
 
@@ -85,10 +85,11 @@ m_val = 0.3;
 g_val = 9.81;
 L_val = 6.25;
 k_val = 0;
-theta_val = [m_val g_val L_val k_val];
+u_val = -1;
+theta_val = [m_val g_val L_val k_val u_val];
 
 % DAE settings
-x0 = [6.25 0 0 0 0 m_val g_val L_val]';
+x0 = [6.25 0 0 0 -u_val/L_val m_val]';
 tspan = [0:0.01:15];
 M = diag([1 1 m_val m_val 0 ones(1,p)]);
 options = odeset('Mass',M,'RelTol',1e-30,'AbsTol',1e-12*ones(1,length(x0)));
@@ -140,12 +141,12 @@ for k = 1:step:T
     count = count + 1;
     
     % Evaluates the observability rank at each time step
-    Oc_k = double(subs(Oc,[xbar;m;g;L;kdrag],[xder(k,:)';theta_val']));
+    Oc_k = double(subs(Oc,[xbar;m;g;L;kdrag;u],[xder(k,:)';theta_val']));
     
     % Identifiability
     M1_k = Oc_k(:,[n1+1:n1+p]);
     M2_k = Oc_k(:,[1:n1 n1+p+1:size(Oc,2)]);
-    ident(k,1) = ( rank(Oc_k,tol) == p + rank(M2_k,tol) );
+    ident(k,1) = ( rank(Oc_k,tol) == p + rank(M2_k,tol) )
 end
 
 %% Plot
