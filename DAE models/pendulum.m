@@ -31,11 +31,14 @@ m = theta(1);   % mass
 g = theta(2);   % gravity
 L = theta(3);   % length
 k = theta(4);   % drag
+u = theta(5);   % input
+
+% Input
 
 % Functions
 f = [x(3);
      x(4);
-     x(5)*x(1)       - k*abs(x(3))*x(3);
+     x(5)*x(1)       - k*abs(x(3))*x(3) + u;
      x(5)*x(2) - m*g - k*abs(x(4))*x(4);
-     x(5)*(x(1)^2 + x(2)^2)/m + (x(3)^2 + x(4)^2) - g*x(2);
+     x(5)*(x(1)^2 + x(2)^2)/m + (x(3)^2 + x(4)^2) - g*x(2) + x(1)*u/m;
      zeros(p,1)];
