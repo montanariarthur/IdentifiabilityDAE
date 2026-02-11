@@ -89,7 +89,7 @@ u_val = -1;
 theta_val = [m_val g_val L_val k_val u_val];
 
 % DAE settings
-x0 = [6.25 0 0 0 -u_val/L_val m_val]';
+x0 = [6.25 0 0 0 -u_val/L_val m_val g_val L_val]';
 tspan = [0:0.01:15];
 M = diag([1 1 m_val m_val 0 ones(1,p)]);
 options = odeset('Mass',M,'RelTol',1e-30,'AbsTol',1e-12*ones(1,length(x0)));
