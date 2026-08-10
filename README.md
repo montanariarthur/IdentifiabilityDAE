@@ -60,15 +60,15 @@ Fig. 1 shows the identifiable and unidentifiable regions in the state space depe
 
 After performing the same identifiability analysis for $y(t) = x_2(t)$ and $y(t) = x_3(t)$, Fig. 1b,c shows that the system is locally identifiable everywhere around the limit cycle solution when these other types of measurement signals (sensors) are considered. This result is particularly advantageous from a sensor placement perspective, as temperature sensors ($y = x_2$) are both affordable and practical to install in chemical reactors.
 
-![](fig/fig_chemical.pdf)
+![](fig/fig_chemical.png)
 
-**Fig. 1.**  Identifiable regions of the chemical reactor model for measurement signals given by: **(a)** $y = x_1$, **(b)** $y = x_2$, and **(c)** $y = x_3$. The blue (red) colors correspond to states $\bm x$ in which the parameter $T_c$ is identifiable (unidentifiable). The black solid line represents the state trajectory $x(t)$ starting at the initial condition $x(0) = [0.5 , 350 , 0.4995]^{\mathsf T}$ and converging to a limit cycle. The system parameters were set to $(c_0,T_0,T_c) = (1, 350,305)$, and $(k_1,k_2,k_3,k_4,k_5) = (1, 209.205,  2.0921, 8.7503\cdot 10^3,7.2\cdot 10^{10})$. The numerical simulations are shown using the `ode15s` solver in MATLAB.
+**Fig. 1.**  Identifiable regions of the chemical reactor model for measurement signals given by: **(a)** $y = x_1$, **(b)** $y = x_2$, and **(c)** $y = x_3$. The blue (red) colors correspond to states $x$ in which the parameter $T_c$ is identifiable (unidentifiable). The black solid line represents the state trajectory $x(t)$ starting at the initial condition $x(0) = [0.5 , 350 , 0.4995]^{\mathsf T}$ and converging to a limit cycle. The system parameters were set to $(c_0,T_0,T_c) = (1, 350,305)$, and $(k_1,k_2,k_3,k_4,k_5) = (1, 209.205,  2.0921, 8.7503\cdot 10^3,7.2\cdot 10^{10})$. The numerical simulations are shown using the `ode15s` solver in MATLAB.
 
 ### Numerical conditioning and sensitivity analysis
 
 We note that the outcome of our identifiability analysis depends on the choice of tolerances used in the rank computations. Regions of identifiable/unidentifiable states may expand or shrink depending on the tolerance value, as illustrated in Fig. 2. If the rank tolerances are not appropriately set, condition (9) may be numerically satisfied for ill-conditioned identifiability matrices, even when the system is *practically* (i.e., almost) unidentifiable.
 
-![](fig/fig_ranktolerance.pdf)
+![](fig/fig_ranktolerance.png)
 
 **Fig. 2.**  Identifiable regions of the chemical reactor for different choices of rank tolerances: **(a)** $10^{-1}$, **(b)** $10^{-6}$, **(c)** $10^{-15}$. The blue (red) colors correspond to states $x$ in which the parameter $T_c$ is identifiable (unidentifiable) using sensor $y = x_1$.
 
