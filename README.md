@@ -56,7 +56,12 @@ and $d^i F/dt^i$, $i\geq 2$, is omitted for brevity. Note that $F_{\mu}$ and $H_
 
 #### Code implementation
 
-To construct the identifiability matrix (8) in our code, the function `DAEobsvmatrix` uses symbolic computation to i) differentiate $F_{\mu}$ and $H_{\nu}$ up to the specified orders $\mu$ and $\nu$ and ii) calculate the Jacobian of these differentiated equations with respect to the augmented state $[x, \theta]$ and its derivatives. To evaluate the identifiability condition (9), we first simulate the DAE numerically using `ode15s` to obtain a trajectory of consistent states $x(t)\in\mathbb L$. At each sampled point along the trajectory, the state derivatives are estimated from the simulated data and substituted into the symbolic identifiability matrix. The rank of the identifiability matrix is evaluated numerically using the function `rank` with some pre-specified numerical tolerance.
+To construct the identifiability matrix (8) in our code, the function `DAEobsvmatrix` uses symbolic computation to i) differentiate $F_{\mu}$ and $H_{\nu}$ up to the specified orders $\mu$ and $\nu$ and ii) calculate the Jacobian of these differentiated equations with respect to the augmented state $[x, \theta]$ and its derivatives. 
+
+To evaluate the identifiability condition (9), we first simulate the DAE numerically using `ode15s` to obtain a trajectory of consistent states $x(t)\in\mathbb L$. At each sampled point along the trajectory, the state derivatives $[x,\dot x,\ddot x, ...]$ are numerically approximated from the simulated data using the MATLAB function `gradient` and then substituted into the symbolic identifiability matrix. The rank of the identifiability matrix is evaluated numerically using the function `rank` with some pre-specified numerical tolerance.
+
+Second, the DAE is numerically simulated using `ode15s`. At each sampled time point, the required state derivatives are numerically approximated from the simulated state trajectories using MATLAB’s `gradient` function. Higher-order derivatives are obtained recursively by applying `gradient` to the preceding derivative, while all derivatives of the augmented parameter states are set to zero because the parameters are assumed constant. These values are then substituted into the symbolic identifiability matrix.
+
 
 ### Local identifiability analysis and sensor placement problem
 
